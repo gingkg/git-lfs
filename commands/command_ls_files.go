@@ -21,10 +21,19 @@ var (
 func lsFilesCommand(cmd *cobra.Command, args []string) {
 	requireInRepo()
 
-	var ref *git.Ref
+	var (
+		ref        *git.Ref
+		currentRef *git.Ref
+
+		err error
+	)
+
+	currentRef, err = git.CurrentRef()
+	if err != nil {
+		currentRef = git.RefBeforeFirstCommit
+	}
 
 	if len(args) == 1 {
-		var err error
 		if lsFilesScanAll {
 			Exit("fatal: cannot use --all with explicit reference")
 		}
@@ -33,12 +42,7 @@ func lsFilesCommand(cmd *cobra.Command, args []string) {
 			Exit("fatal: could not resolve ref %s", args[0])
 		}
 	} else {
-		fullref, err := git.CurrentRef()
-		if err != nil {
-			ref = git.RefBeforeFirstCommit
-		} else {
-			ref = fullref
-		}
+		ref = currentRef
 	}
 
 	showOidLen := 10

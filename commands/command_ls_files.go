@@ -21,19 +21,23 @@ var (
 func lsFilesCommand(cmd *cobra.Command, args []string) {
 	requireInRepo()
 
-	var ref string
+	var ref *git.Ref
 
 	if len(args) == 1 {
+		var err error
 		if lsFilesScanAll {
 			Exit("fatal: cannot use --all with explicit reference")
 		}
-		ref = args[0]
+		ref, err = git.ResolveRef(args[0])
+		if err != nil {
+			Exit("fatal: could not resolve ref %s", args[0])
+		}
 	} else {
 		fullref, err := git.CurrentRef()
 		if err != nil {
-			ref = git.RefBeforeFirstCommit.Sha
+			ref = git.RefBeforeFirstCommit
 		} else {
-			ref = fullref.Sha
+			ref = fullref
 		}
 	}
 
@@ -88,7 +92,7 @@ func lsFilesCommand(cmd *cobra.Command, args []string) {
 	includeArg, excludeArg := getIncludeExcludeArgs(cmd)
 	gitscanner.Filter = buildFilepathFilter(cfg, includeArg, excludeArg)
 
-	if err := gitscanner.ScanIndex(ref, nil); err != nil {
+	if err := gitscanner.ScanIndex(ref.Sha, nil); err != nil {
 		Exit("Could not scan for Git LFS index: %s", err)
 	}
 	if lsFilesScanAll {
@@ -98,9 +102,9 @@ func lsFilesCommand(cmd *cobra.Command, args []string) {
 	} else {
 		var err error
 		if lsFilesScanDeleted {
-			err = gitscanner.ScanRefWithDeleted(ref, nil)
+			err = gitscanner.ScanRefWithDeleted(ref.Sha, nil)
 		} else {
-			err = gitscanner.ScanTree(ref)
+			err = gitscanner.ScanTree(ref.Sha)
 		}
 
 		if err != nil {

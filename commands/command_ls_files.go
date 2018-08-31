@@ -36,7 +36,16 @@ func lsFilesCommand(cmd *cobra.Command, args []string) {
 	if len(args) == 1 {
 		if lsFilesScanAll {
 			Exit("fatal: cannot use --all with explicit reference")
+		} else if args[0] == "--all" {
+			// Since --all is a valid argument to "git rev-parse",
+			// if we try to give it to git.ResolveRef below, we'll
+			// get an unexpected result.
+			//
+			// So, let's check early that the caller invoked the
+			// command correctly.
+			Exit("fatal: did you mean \"git lfs ls-files --all --\" ?")
 		}
+
 		ref, err = git.ResolveRef(args[0])
 		if err != nil {
 			Exit("fatal: could not resolve ref %s", args[0])

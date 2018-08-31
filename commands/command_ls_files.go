@@ -31,7 +31,7 @@ func lsFilesCommand(cmd *cobra.Command, args []string) {
 	} else {
 		fullref, err := git.CurrentRef()
 		if err != nil {
-			ref = git.RefBeforeFirstCommit
+			ref = git.RefBeforeFirstCommit.Sha
 		} else {
 			ref = fullref.Sha
 		}

@@ -28,7 +28,7 @@ func statusCommand(cmd *cobra.Command, args []string) {
 
 	scanIndexAt := "HEAD"
 	if ref == nil {
-		scanIndexAt = git.RefBeforeFirstCommit
+		scanIndexAt = git.RefBeforeFirstCommit.Sha
 	}
 
 	scanner, err := lfs.NewPointerScanner()

@@ -33,10 +33,16 @@ const (
 	RefTypeRemoteTag    = RefType(iota)
 	RefTypeHEAD         = RefType(iota) // current checkout
 	RefTypeOther        = RefType(iota) // stash or unknown
+)
 
+var (
 	// A ref which can be used as a placeholder for before the first commit
-	// Equivalent to git mktree < /dev/null, useful for diffing before first commit
-	RefBeforeFirstCommit = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+	// Equivalent to git mktree < /dev/null, useful for diffing before first
+	// commit
+	RefBeforeFirstCommit = &Ref{
+		Type: RefTypeOther,
+		Sha:  "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+	}
 )
 
 // Prefix returns the given RefType's prefix, "refs/heads", "ref/remotes",

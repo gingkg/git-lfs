@@ -105,8 +105,16 @@ func lsFilesCommand(cmd *cobra.Command, args []string) {
 	includeArg, excludeArg := getIncludeExcludeArgs(cmd)
 	gitscanner.Filter = buildFilepathFilter(cfg, includeArg, excludeArg)
 
-	if err := gitscanner.ScanIndex(ref.Sha, nil); err != nil {
-		Exit("Could not scan for Git LFS index: %s", err)
+	if currentRef.Sha == ref.Sha {
+		// Only scan the index when "git lfs ls-files" was invoked with
+		// no arguments, or a reference pointing to the HEAD checkout
+		// (or before the first commit).
+		//
+		// Do so to avoid showing "mixed" results, e.g., ls-files output
+		// from a specific historical revision, and the index.
+		if err := gitscanner.ScanIndex(ref.Sha, nil); err != nil {
+			Exit("Could not scan for Git LFS index: %s", err)
+		}
 	}
 	if lsFilesScanAll {
 		if err := gitscanner.ScanAll(nil); err != nil {
